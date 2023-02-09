@@ -1,6 +1,18 @@
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 
+
+// ***********************************************
+#define digitalSwitch D0
+
+bool currentStatusSwitch;
+bool deviceState;
+unsigned long previousMillis = 0;
+const long interval = 500;
+// ***********************************************
+
+
+
 typedef struct esp_now_peer_info {
   u8 peer_addr[6];
   uint8_t channel;
@@ -115,27 +127,27 @@ void manageSlave() {
   }
 }
 
-
-uint8_t data = 0;
-// send data
+// ***********************************************
 void sendData() {
-  data++;
   for (int i = 0; i < SlaveCnt; i++) {
     u8 *peer_addr = slaves[i].peer_addr;
     if (i == 0) { // print only for first slave
       Serial.print("Sending: ");
-      Serial.println(data);
+      Serial.println(deviceState);
     }
-    int result = esp_now_send(peer_addr, &data, sizeof(data));
+    int result = esp_now_send(peer_addr, (u8*)&deviceState, sizeof(deviceState));
     Serial.print("Send Status: ");
     if (result == 0) {
       Serial.println("Success");
     } else {
       Serial.println("Failed");
     }
-    delay(100);
   }
 }
+
+
+// ***********************************************
+
 
 // callback when data is sent from Master to Slave
 esp_now_send_cb_t OnDataSent([](uint8_t *mac_addr, uint8_t status) {
@@ -147,7 +159,13 @@ esp_now_send_cb_t OnDataSent([](uint8_t *mac_addr, uint8_t status) {
 });
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); 
+
+  // ***********************************************
+  pinMode(digitalSwitch, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  // ***********************************************
+  
   //Set device in STA mode to begin with
   WiFi.mode(WIFI_STA);
   Serial.println("ESPNow/Multi-Slave/Master Example");
@@ -171,11 +189,30 @@ void loop() {
     manageSlave();
     // pair success or already paired
     // Send data to device
-    sendData();
   } else {
     // No slave found to process
   }
+  
+
+  // ***********************************************
+  unsigned long currentMillis = millis();
+  currentStatusSwitch = digitalRead(digitalSwitch);
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    
+    if (currentStatusSwitch == HIGH) {
+      Serial.println("Sensor Touched");
+      deviceState = !deviceState;
+      digitalWrite(LED_BUILTIN, deviceState);
+
+      sendData();
+      
+    }
+  }
+  // ***********************************************
+  
 
   // wait for 1 second to run the logic again
-  delay(1000);
+
 }
