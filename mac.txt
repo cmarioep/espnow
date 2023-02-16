@@ -1,9 +1,0 @@
-
-
-cliente
-ESP01
-48:3F:DA:17:0C:D0
-
-Server
-NodeMCU
-C4:5B:BE:6C:AF:A6
