@@ -177,15 +177,6 @@ void setup() {
   // get the status of Trasnmitted packet
   esp_now_register_send_cb(OnDataSent);
 
-  
-  // ***********************************************
-  wifi_set_sleep_type(NONE_SLEEP_T);
-  // ***********************************************
-  
-  
-}
-
-void loop() {
   // In the loop we scan for slave
   ScanForSlave();
   // If Slave is found, it would be populate in `slave` variable
@@ -200,6 +191,15 @@ void loop() {
     // No slave found to process
   }
   
+  
+  // ***********************************************
+  wifi_set_sleep_type(NONE_SLEEP_T);
+  // ***********************************************
+  
+  
+}
+
+void loop() {
 
   // ***********************************************
   unsigned long currentMillis = millis();
