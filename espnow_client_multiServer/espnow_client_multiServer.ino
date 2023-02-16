@@ -176,6 +176,13 @@ void setup() {
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
   esp_now_register_send_cb(OnDataSent);
+
+  
+  // ***********************************************
+  wifi_set_sleep_type(NONE_SLEEP_T);
+  // ***********************************************
+  
+  
 }
 
 void loop() {
